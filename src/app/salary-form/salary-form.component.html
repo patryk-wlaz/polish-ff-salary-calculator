@@ -1,0 +1,86 @@
+<div class="container">
+  <h1>Kalkulator pensji strażaka PSP</h1>
+  <form (ngSubmit)="onSubmit()" #salaryForm="ngForm">
+    <div class="form-group">
+      <label for="hub">Miejsce pracy</label>
+      <select
+        class="form-control"
+        id="hub"
+        required
+        [(ngModel)]="formData.hub" name="hub"
+        #hub="ngModel">
+        <option *ngFor="let hub of hubs" [value]="hub">{{hub}}</option>
+      </select>
+      <div *ngIf="!hub.pristine && !hub.valid" class="alert alert-danger">
+        Musisz wybrać miejsce pracy.
+      </div>
+    </div>
+
+    <div class="form-group" *ngIf="formData.hub">
+      <label for="occupation">Stanowisko</label>
+      <select
+        class="form-control"
+        id="occupation"
+        required
+        [(ngModel)]="formData.occupation" name="occupation"
+        #occupation="ngModel">
+        <option *ngFor="let occupation of getOccupations()" [value]="occupation">{{occupation}}</option>
+      </select>
+      <div *ngIf="!occupation.pristine && !occupation.valid" class="alert alert-danger">
+        Musisz wybrać stanowisko.
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="rank">Stopień służbowy</label>
+      <select
+        class="form-control"
+        id="rank"
+        required
+        [(ngModel)]="formData.rank" name="rank"
+        #rank="ngModel">
+        <option *ngFor="let rank of ranks" [value]="rank">{{rank}}</option>
+      </select>
+      <div *ngIf="!rank.pristine && !rank.valid" class="alert alert-danger">
+        Musisz wybrać stopień służbowy.
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label for="serviceAllowance">Dodatek służbowy</label>
+      <input
+        type="number"
+        min="0"
+        class="form-control"
+        id="serviceAllowance"
+        required
+        [(ngModel)]="formData.serviceAllowance"
+        name="serviceAllowance"
+        #serviceAllowance="ngModel">
+      <div *ngIf="!serviceAllowance.pristine && !serviceAllowance.valid" class="alert alert-danger">
+        Musisz podać dodatek służbowy.
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label for="dutyStart">Dzień liczony jako rozpoczęcie stażu służby</label>
+      <input
+        type="date"
+        id="dutyStart"
+        class="form-control"
+        required
+        [(ngModel)]="formData.dutyStart"
+        name="dutyStart"
+        #dutyStart="ngModel">
+      <div *ngIf="!dutyStart.pristine && !dutyStart.valid" class="alert alert-danger">
+        Musisz podać ddzień liczony jako początek stażu służby. Zapytaj w kadrach ;)
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-success" [disabled]="!salaryForm.form.valid">Submit</button>
+  </form>
+</div>
+
+<div *ngIf="salary">
+  Salary calculated: {{salary}}
+</div>
