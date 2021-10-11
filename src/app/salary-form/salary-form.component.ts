@@ -16,6 +16,7 @@ export class SalaryFormComponent implements OnInit {
     serviceAllowance: 0,
     functionalAllowance: 0,
     dutyStart: null,
+    additions: 0,
   };
   hubs = occupationsMap.map(data => data.hub);
   ranks = rankMap.map(data => data.name);
@@ -43,7 +44,7 @@ export class SalaryFormComponent implements OnInit {
     const rank = rankMap.find(rankData => rankData.name === this.formData.rank);
     const rankMoney = rank.value;
 
-    const brutto = base + dutyYearsBonus + rankMoney + this.formData.serviceAllowance + this.formData.functionalAllowance;
+    const brutto = base + dutyYearsBonus + rankMoney + this.formData.serviceAllowance + this.formData.functionalAllowance - this.formData.additions;
     this.salary = 0.83 * brutto;
   }
 

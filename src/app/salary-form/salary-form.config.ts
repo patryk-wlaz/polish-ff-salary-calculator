@@ -359,4 +359,5 @@ export interface SalaryFormData {
   serviceAllowance: number;
   functionalAllowance: number;
   dutyStart: string;
+  additions: number;
 }
