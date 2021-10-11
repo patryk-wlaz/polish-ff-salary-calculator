@@ -1,4 +1,6 @@
 export const baseSalary = 1614.69;
+export const nszzCutPercentage = 0.82;
+export const florianCutPercentage = 0.5;
 
 const groupToQuantifirerMap = {
   20:	5.588,
@@ -360,4 +362,7 @@ export interface SalaryFormData {
   functionalAllowance: number;
   dutyStart: string;
   additions: number;
+  nszz: boolean;
+  florian: boolean;
+  taxFree: boolean;
 }

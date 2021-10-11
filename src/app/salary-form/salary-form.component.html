@@ -168,6 +168,53 @@
         </div>
       </div>
     </div>
+    
+    <div class="form-group">
+      <label for="unions">Związki zawodowe</label>
+      <div class="input-and-info unions">
+        <input
+          type="checkbox"
+          name="florian"
+          #florian="ngModel"
+          [(ngModel)]="formData.florian"
+          [ngModelOptions]="{standalone: true}">
+        <label for="florian">Florian</label>
+
+        <input
+          class="second-union"
+          type="checkbox"
+          name="nszz"
+          #nszz="ngModel"
+          [(ngModel)]="formData.nszz"
+          [ngModelOptions]="{standalone: true}">
+        <label for="nszz">NSZZ Solidarność</label>
+
+        <div class="flexer"></div>
+        <img src="assets/info.svg" (click)="onInfotipClick('unions')"/>
+        <div class="form-info" *ngIf="displayedInfo === 'unions'">
+          Zaznacz związki zawodowe, do których należysz. Przepisy prawa nie zabraniają przynależności do wielu związków zawodowych. Zdarza się natomiast, że zakazane jest to w statutach nietórych związków.
+        </div>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label for="taxFree">Zwolnienie z PIT</label>
+      <div class="input-and-info">
+        <input
+          type="checkbox"
+          name="taxFree"
+          #taxFree="ngModel"
+          [(ngModel)]="formData.taxFree"
+          [ngModelOptions]="{standalone: true}">
+        <label for="taxFree">Jestem zwolniony z podatku dochodowego</label>
+
+        <div class="flexer"></div>
+        <img src="assets/info.svg" (click)="onInfotipClick('taxFree')"/>
+        <div class="form-info" *ngIf="displayedInfo === 'taxFree'">
+          Zaznacz, jeśli jesteś zwolniony z podatku dochodowego (np. masz mniej niż 26 lat).
+        </div>
+      </div>
+    </div>
 
     <button type="submit" class="button" [disabled]="!salaryForm.form.valid">Submit</button>
   </form>

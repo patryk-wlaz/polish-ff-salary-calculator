@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import * as moment from 'moment';
 
-import { SalaryFormData, occupationsMap, rankMap, baseSalary } from './salary-form.config';
+import { SalaryFormData, occupationsMap, rankMap, baseSalary, nszzCutPercentage, florianCutPercentage } from './salary-form.config';
 
 @Component({
   selector: 'app-salary-form',
@@ -17,6 +17,9 @@ export class SalaryFormComponent implements OnInit {
     functionalAllowance: 0,
     dutyStart: null,
     additions: 0,
+    nszz: false,
+    florian: false,
+    taxFree: false,
   };
   hubs = occupationsMap.map(data => data.hub);
   ranks = rankMap.map(data => data.name);
@@ -38,14 +41,23 @@ export class SalaryFormComponent implements OnInit {
     const startDate = moment(this.formData.dutyStart);
     const endDate = moment(Date.now());
     const dutyYears = endDate.diff(startDate, 'years');
-    console.log('this.countDutyYearsBonusPercentage(dutyYears): ', this.countDutyYearsBonusPercentage(dutyYears));
+
     const dutyYearsBonus = this.countDutyYearsBonusPercentage(dutyYears) / 100 * base;
 
     const rank = rankMap.find(rankData => rankData.name === this.formData.rank);
     const rankMoney = rank.value;
 
-    const brutto = base + dutyYearsBonus + rankMoney + this.formData.serviceAllowance + this.formData.functionalAllowance - this.formData.additions;
-    this.salary = 0.83 * brutto;
+    const brutto = base + dutyYearsBonus + rankMoney + this.formData.serviceAllowance + this.formData.functionalAllowance;
+    const nszzCut = this.formData.nszz
+      ? nszzCutPercentage * brutto / 100
+      : 0;
+    const florianCut = this.formData.florian
+      ? florianCutPercentage * brutto / 100
+      : 0;
+    
+    const taxMultiplier = this.formData.taxFree ? 1 : 0.83;
+
+    this.salary = taxMultiplier * brutto - florianCut - nszzCut - this.formData.additions;
   }
 
   getOccupations(): string[] {
