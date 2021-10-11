@@ -1,16 +1,20 @@
 <div class="container">
-  <h1>Kalkulator pensji strażaka PSP</h1>
-  <form (ngSubmit)="onSubmit()" #salaryForm="ngForm">
+  <form (ngSubmit)="onSubmit()" #salaryForm="ngForm" class="form">
     <div class="form-group">
       <label for="hub">Miejsce pracy</label>
-      <select
-        class="form-control"
-        id="hub"
-        required
-        [(ngModel)]="formData.hub" name="hub"
-        #hub="ngModel">
-        <option *ngFor="let hub of hubs" [value]="hub">{{hub}}</option>
-      </select>
+      <div class="input-and-info">
+        <select
+          class="form-control"
+          id="hub"
+          required
+          [(ngModel)]="formData.hub"
+          (click)="resetOccupation()"
+          name="hub"
+          #hub="ngModel">
+          <option *ngFor="let hub of hubs" [value]="hub">{{hub}}</option>
+        </select>
+        <div class="space-taker"></div>
+      </div>
       <div *ngIf="!hub.pristine && !hub.valid" class="alert alert-danger">
         Musisz wybrać miejsce pracy.
       </div>
@@ -18,14 +22,20 @@
 
     <div class="form-group" *ngIf="formData.hub">
       <label for="occupation">Stanowisko</label>
-      <select
-        class="form-control"
-        id="occupation"
-        required
-        [(ngModel)]="formData.occupation" name="occupation"
-        #occupation="ngModel">
-        <option *ngFor="let occupation of getOccupations()" [value]="occupation">{{occupation}}</option>
-      </select>
+      <div class="input-and-info">
+        <select
+          class="form-control"
+          id="occupation"
+          required
+          [(ngModel)]="formData.occupation" name="occupation"
+          #occupation="ngModel">
+          <option *ngFor="let occupation of getOccupations()" [value]="occupation">{{occupation}}</option>
+        </select>
+        <img src="assets/info.svg"(click)="onInfotipClick('occupation')"/>
+        <div class="form-info" *ngIf="displayedInfo === 'occupation'">
+          Jesli nie wiesz, jakie masz stanowisko, to zapytaj swojego dowódcę jednostki, ale od razu wymyśl sobie karę.
+        </div>
+      </div>
       <div *ngIf="!occupation.pristine && !occupation.valid" class="alert alert-danger">
         Musisz wybrać stanowisko.
       </div>
@@ -33,51 +43,115 @@
 
     <div class="form-group">
       <label for="rank">Stopień służbowy</label>
-      <select
-        class="form-control"
-        id="rank"
-        required
-        [(ngModel)]="formData.rank" name="rank"
-        #rank="ngModel">
-        <option *ngFor="let rank of ranks" [value]="rank">{{rank}}</option>
-      </select>
+      <div class="input-and-info">
+        <select
+          class="form-control"
+          id="rank"
+          required
+          [(ngModel)]="formData.rank" name="rank"
+          #rank="ngModel">
+          <option *ngFor="let rank of ranks" [value]="rank">{{rank}}</option>
+        </select>
+        <img src="assets/info.svg"(click)="onInfotipClick('rank')"/>
+        <div class="form-info" *ngIf="displayedInfo === 'rank'">
+          Jeśli nie wiesz jaki masz stopień służbowy, to najwyraźniej jeszcze nie pracujesz i zastanawiasz się, czy w ogóle warto. Jeśli przyjmiesz się bezpośrednio "z ulicy", zostaniesz strażakiem. Jeśli skończysz szkołę aspirancką - młodszym aspirantem, a po SGSP zostaniesz młodszym kapitanem.
+        </div>
+      </div>
       <div *ngIf="!rank.pristine && !rank.valid" class="alert alert-danger">
         Musisz wybrać stopień służbowy.
       </div>
     </div>
     
-    <div class="form-group">
+    <div class="form-group" *ngIf="chosenServiceAllowance else functionalAllowance">
       <label for="serviceAllowance">Dodatek służbowy</label>
-      <input
-        type="number"
-        min="0"
-        class="form-control"
-        id="serviceAllowance"
-        required
-        [(ngModel)]="formData.serviceAllowance"
-        name="serviceAllowance"
-        #serviceAllowance="ngModel">
-      <div *ngIf="!serviceAllowance.pristine && !serviceAllowance.valid" class="alert alert-danger">
-        Musisz podać dodatek służbowy.
+      <div class="input-and-info">
+        <input
+          type="number"
+          min="0"
+          [max]="calculateMaxAllowance()"
+          class="form-control"
+          [disabled]="!formData.rank || !formData.hub || !formData.occupation"
+          id="serviceAllowance"
+          required
+          [(ngModel)]="formData.serviceAllowance"
+          name="serviceAllowance"
+          #serviceAllowance="ngModel">
+        <img src="assets/info.svg" (click)="onInfotipClick('serviceAllowance')"/>
+        <div class="form-info" *ngIf="displayedInfo === 'serviceAllowance'">
+          Twój dodatek służbowy jest określany przez przełożonego uprawnionego do mianowania lub powołania. Może wynieść do 50% otrzymywanego uposażenia zasadniczego i dodatku za stopień.
+        </div>
       </div>
-    </div>
-    
-    <div class="form-group">
-      <label for="dutyStart">Dzień liczony jako rozpoczęcie stażu służby</label>
-      <input
-        type="date"
-        id="dutyStart"
-        class="form-control"
-        required
-        [(ngModel)]="formData.dutyStart"
-        name="dutyStart"
-        #dutyStart="ngModel">
-      <div *ngIf="!dutyStart.pristine && !dutyStart.valid" class="alert alert-danger">
-        Musisz podać ddzień liczony jako początek stażu służby. Zapytaj w kadrach ;)
+      <div class="allowance-info-and-button-wrapper">
+        <div *ngIf="!formData.rank || !formData.hub || !formData.occupation else maxServiceAllowance">
+          Musisz podać miejsce pracy, stanowisko i stopień, żeby można było obliczyć maksymalny możliwy dodatek służbowy.
+        </div>
+        <ng-template #maxServiceAllowance>
+            <p class="max-allowance-info">Max: {{calculateMaxAllowance()}}</p>
+        </ng-template>
+        <button (click)="toggleAllowances()">Zmień na dodatek funkcyjny</button>
+      </div>
+      <div *ngIf="!serviceAllowance.pristine && !serviceAllowance.valid" class="alert alert-danger">
+        Musisz podać dodatek służbowy mniejszy niż dopuszczalny na Twoim miejscu pracy max.
       </div>
     </div>
 
-    <button type="submit" class="btn btn-success" [disabled]="!salaryForm.form.valid">Submit</button>
+    <ng-template #functionalAllowance>
+      <div class="form-group">
+        <label for="functionalAllowance">Dodatek funkcyjny</label>
+        <div class="input-and-info">
+          <input
+            type="number"
+            min="0"
+            [max]="calculateMaxAllowance(true)"
+            class="form-control"
+            [disabled]="!formData.rank || !formData.hub || !formData.occupation"
+            id="functionalAllowance"
+            required
+            [(ngModel)]="formData.functionalAllowance"
+            name="functionalAllowance"
+            #functionalAllowance="ngModel">
+          <img src="assets/info.svg" (click)="onInfotipClick('functionalAllowance')"/>
+          <div class="form-info" *ngIf="displayedInfo === 'functionalAllowance'">
+           Dodatek funkcyjny (którego przyznanie wyklucza przyznawanie dodatku służbowego) jest możliwy do przyznania na określonych stanowiskach (wymienionych w rozporządzeniu). Jego maksymalna wartość jest wyższa niż dodatku służbowego, jednak strażacy pobierający go tracą prawo do rozliczania nadgodzin.
+          </div>
+        </div>
+        <div class="allowance-info-and-button-wrapper">
+          <div *ngIf="!formData.rank || !formData.hub || !formData.occupation else maxServiceAllowance">
+            Musisz podać miejsce pracy, stanowisko i stopień, żeby można było obliczyć maksymalny możliwy dodatek funkcyjny.
+          </div>
+          <ng-template #maxServiceAllowance>
+              <p class="max-allowance-info">Max: {{calculateMaxAllowance(true)}}</p>
+          </ng-template>
+          <button (click)="toggleAllowances()">Zmień na dodatek służbowy</button>
+        </div>
+        <div *ngIf="!functionalAllowance.pristine && !functionalAllowance.valid" class="alert alert-danger">
+          Musisz podać dodatek służbowy mniejszy niż dopuszczalny na Twoim miejscu pracy max.
+        </div>
+      </div>
+    </ng-template>
+    
+    <div class="form-group">
+      <label for="dutyStart">Dzień liczony jako rozpoczęcie stażu służby</label>
+      <div class="input-and-info">
+        <input
+          type="date"
+          id="dutyStart"
+          class="form-control"
+          required
+          [(ngModel)]="formData.dutyStart"
+          name="dutyStart"
+          #dutyStart="ngModel">
+        <img src="assets/info.svg"(click)="onInfotipClick('dutyStart')"/>
+        <div class="form-info" *ngIf="displayedInfo === 'dutyStart'">
+          Podaj dzień, od którego liczony jest Twój staż służby. Pamiętaj, że zaliczają się do niego również lata służby w innych służbach i okresy pracy wykonywanej przed służbą zgodnie z Art.88 $4 Ustawy o PSP. Dopytaj w kadrach, jesli nie jesteś pewien.
+        </div>
+      </div>
+      <div *ngIf="!dutyStart.pristine && !dutyStart.valid" class="alert alert-danger">
+        Musisz podać dzień liczony jako początek stażu służby.
+      </div>
+    </div>
+
+    <button type="submit" class="button" [disabled]="!salaryForm.form.valid">Submit</button>
   </form>
 </div>
 

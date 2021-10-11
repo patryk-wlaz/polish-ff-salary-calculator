@@ -14,11 +14,16 @@ export class SalaryFormComponent implements OnInit {
     occupation: null,
     rank: null,
     serviceAllowance: 0,
+    functionalAllowance: 0,
     dutyStart: null,
   };
   hubs = occupationsMap.map(data => data.hub);
   ranks = rankMap.map(data => data.name);
   salary = 0;
+
+  chosenServiceAllowance = true;
+
+  displayedInfo: string;
 
   constructor() { }
 
@@ -38,7 +43,7 @@ export class SalaryFormComponent implements OnInit {
     const rank = rankMap.find(rankData => rankData.name === this.formData.rank);
     const rankMoney = rank.value;
 
-    const brutto = base + dutyYearsBonus + rankMoney + this.formData.serviceAllowance;
+    const brutto = base + dutyYearsBonus + rankMoney + this.formData.serviceAllowance + this.formData.functionalAllowance;
     this.salary = 0.83 * brutto;
   }
 
@@ -55,6 +60,33 @@ export class SalaryFormComponent implements OnInit {
     return yearsOverTwenty <= 0
       ? years
       : 20 + Math.floor(yearsOverTwenty / 2) * 2;
+  }
+
+  public onInfotipClick(type: string): void {
+    this.displayedInfo = type;
+  }
+
+  public calculateMaxAllowance(functional = false): number {
+    if (!this.formData.hub || !this.formData.occupation || !this.formData.rank) { return 0; }
+    const hub = occupationsMap.find(hubData => hubData.hub === this.formData.hub);
+    const occupation = hub.map.find(occupationData => occupationData.name === this.formData.occupation);
+
+    const base = Math.round(occupation.quantifier * baseSalary / 10) * 10; // round to 10pln
+    const rank = rankMap.find(rankData => rankData.name === this.formData.rank);
+    const rankMoney = rank.value;
+
+    const multiplier = functional ? 7/10 : 1/2;
+    return (base + rankMoney) * multiplier;
+  }
+
+  public resetOccupation(): void {
+    this.formData.occupation = null;
+  }
+
+  public toggleAllowances(): void {
+    this.chosenServiceAllowance = !this.chosenServiceAllowance;
+    this.formData.functionalAllowance = 0;
+    this.formData.serviceAllowance = 0;
   }
 
 }
