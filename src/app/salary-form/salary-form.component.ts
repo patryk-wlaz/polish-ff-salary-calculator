@@ -32,6 +32,7 @@ export class SalaryFormComponent implements OnInit {
     const startDate = moment(this.formData.dutyStart);
     const endDate = moment(Date.now());
     const dutyYears = endDate.diff(startDate, 'years');
+    console.log('this.countDutyYearsBonusPercentage(dutyYears): ', this.countDutyYearsBonusPercentage(dutyYears));
     const dutyYearsBonus = this.countDutyYearsBonusPercentage(dutyYears) / 100 * base;
 
     const rank = rankMap.find(rankData => rankData.name === this.formData.rank);
@@ -48,10 +49,12 @@ export class SalaryFormComponent implements OnInit {
   }
 
   private countDutyYearsBonusPercentage(years: number): number {
-    const overTwenty = years - 20;
-    return overTwenty <= 0
+    if (years >= 35) { return 35; }
+    if (years >= 32) { return 32; }
+    const yearsOverTwenty = years - 20;
+    return yearsOverTwenty <= 0
       ? years
-      : years + Math.floor(overTwenty / 2);
+      : 20 + Math.floor(yearsOverTwenty / 2) * 2;
   }
 
 }
