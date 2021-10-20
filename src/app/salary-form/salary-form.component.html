@@ -216,10 +216,17 @@
       </div>
     </div>
 
-    <button type="submit" class="button" [disabled]="!salaryForm.form.valid">Submit</button>
+    <button type="submit" class="button" [disabled]="!salaryForm.form.valid">Przelicz</button>
   </form>
 </div>
 
 <div *ngIf="salary">
-  Salary calculated: {{salary}}
+  <p class="salary">Na Twoje konto wpłynie {{salary}} pln.</p>
+  <p>Jesteś na grupie {{occupation.group}}. Jej mnożnik {{occupation.quantifier}} pomnożony przez obecną kwotę bazową ({{baseSalary}}) i zaokrąglony do pełnych dziesiątek daje: {{base}} pln.</p>
+  <p>Za wysługę lat przysługuje Ci zwiększenie uposażenia zasadniczego o {{dutyYearsPercentageBonus}}%, czyli o {{dutyYearsBonus}} pln.</p>
+  <p>Za stopień przysługuje Ci {{rankMoney}} pln.</p>
+  <p>Sumując to z dodatkiem {{chosenServiceAllowance ? 'służbowym' : 'funkcyjnym'}} otrzymamy kwotę brutto: {{brutto}}.</p>
+  <p *ngIf="florianCut">Za członkostwo w ZZS Florian zapłacisz {{florianCutPercentage}}% kwoty brutto, czyli {{florianCut}} pln.</p>
+  <p *ngIf="nszzCut">Za członkostwo w NSZZ Solidarność zapłacisz {{nszzCutPercentage}}% kwoty brutto, czyli {{nszzCut}} pln.</p>
+  <p *ngIf="tax">Komenda zapłaci za Ciebie 0.17% kwoty brutto jako zaliczkę podatku dochodowego, czyli {{tax}}.</p>
 </div>

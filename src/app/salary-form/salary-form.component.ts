@@ -3,6 +3,8 @@ import * as moment from 'moment';
 
 import { SalaryFormData, occupationsMap, rankMap, baseSalary, nszzCutPercentage, florianCutPercentage } from './salary-form.config';
 
+const formatNumber = (num: number) => Math.round((num + Number.EPSILON) * 100) / 100;
+
 @Component({
   selector: 'app-salary-form',
   templateUrl: './salary-form.component.html',
@@ -28,6 +30,18 @@ export class SalaryFormComponent implements OnInit {
   chosenServiceAllowance = true;
 
   displayedInfo: string;
+  occupation: { quantifier: number, name: string, group: number };
+  baseSalary = baseSalary;
+  base: number;
+  rankMoney: number;
+  dutyYearsPercentageBonus: number;
+  dutyYearsBonus: number;
+  brutto: number;
+  nszzCut: number;
+  florianCut: number;
+  nszzCutPercentage = nszzCutPercentage;
+  florianCutPercentage = florianCutPercentage;
+  tax: number;
 
   constructor() { }
 
@@ -36,28 +50,30 @@ export class SalaryFormComponent implements OnInit {
   onSubmit() {
     const hub = occupationsMap.find(hubData => hubData.hub === this.formData.hub);
     const occupation = hub.map.find(occupationData => occupationData.name === this.formData.occupation);
-    const base = Math.round(occupation.quantifier * baseSalary / 10) * 10; // round to 10pln
+    this.occupation = occupation;
+    this.base = Math.round(occupation.quantifier * baseSalary / 10) * 10; // round to 10pln
 
     const startDate = moment(this.formData.dutyStart);
     const endDate = moment(Date.now());
     const dutyYears = endDate.diff(startDate, 'years');
 
-    const dutyYearsBonus = this.countDutyYearsBonusPercentage(dutyYears) / 100 * base;
+    this.dutyYearsPercentageBonus = this.countDutyYearsBonusPercentage(dutyYears);
+    this.dutyYearsBonus = formatNumber(this.dutyYearsPercentageBonus / 100 * this.base);
 
     const rank = rankMap.find(rankData => rankData.name === this.formData.rank);
-    const rankMoney = rank.value;
+    this.rankMoney = rank.value;
 
-    const brutto = base + dutyYearsBonus + rankMoney + this.formData.serviceAllowance + this.formData.functionalAllowance;
-    const nszzCut = this.formData.nszz
-      ? nszzCutPercentage * brutto / 100
+    this.brutto = this.base + this.dutyYearsBonus + this.rankMoney + this.formData.serviceAllowance + this.formData.functionalAllowance;
+    this.nszzCut = this.formData.nszz
+      ? formatNumber(nszzCutPercentage * this.brutto / 100)
       : 0;
-    const florianCut = this.formData.florian
-      ? florianCutPercentage * brutto / 100
+    this.florianCut = this.formData.florian
+      ? formatNumber(florianCutPercentage * this.brutto / 100)
       : 0;
     
-    const taxMultiplier = this.formData.taxFree ? 1 : 0.83;
+    this.tax = this.formData.taxFree ? 0 : formatNumber(0.17 * this.brutto);
 
-    this.salary = taxMultiplier * brutto - florianCut - nszzCut - this.formData.additions;
+    this.salary = this.brutto - this.tax - this.florianCut - this.nszzCut - this.formData.additions;
   }
 
   getOccupations(): string[] {
@@ -69,6 +85,7 @@ export class SalaryFormComponent implements OnInit {
   private countDutyYearsBonusPercentage(years: number): number {
     if (years >= 35) { return 35; }
     if (years >= 32) { return 32; }
+    if (years < 2) { return 0; }
     const yearsOverTwenty = years - 20;
     return yearsOverTwenty <= 0
       ? years
