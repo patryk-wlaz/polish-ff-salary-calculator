@@ -11,6 +11,8 @@ const formatNumber = (num: number) => Math.round((num + Number.EPSILON) * 100) /
   styleUrls: ['./salary-form.component.scss']
 })
 export class SalaryFormComponent implements OnInit {
+  readonly FORM_DATA_LS_KEY = 'PFSC-FORMDATA';
+
   formData: SalaryFormData = {
     hub: null,
     occupation: null,
@@ -45,7 +47,9 @@ export class SalaryFormComponent implements OnInit {
 
   constructor() { }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.loadFormData();
+  }
 
   onSubmit() {
     const hub = occupationsMap.find(hubData => hubData.hub === this.formData.hub);
@@ -73,7 +77,9 @@ export class SalaryFormComponent implements OnInit {
     
     this.tax = this.formData.taxFree ? 0 : formatNumber(0.17 * this.brutto);
 
-    this.salary = this.brutto - this.tax - this.florianCut - this.nszzCut - this.formData.additions;
+    this.salary = formatNumber(this.brutto - this.tax - this.florianCut - this.nszzCut - this.formData.additions);
+
+    this.saveFormData();
   }
 
   getOccupations(): string[] {
@@ -106,7 +112,7 @@ export class SalaryFormComponent implements OnInit {
     const rankMoney = rank.value;
 
     const multiplier = functional ? 7/10 : 1/2;
-    return (base + rankMoney) * multiplier;
+    return formatNumber((base + rankMoney) * multiplier);
   }
 
   public resetOccupation(): void {
@@ -117,6 +123,24 @@ export class SalaryFormComponent implements OnInit {
     this.chosenServiceAllowance = !this.chosenServiceAllowance;
     this.formData.functionalAllowance = 0;
     this.formData.serviceAllowance = 0;
+  }
+
+  private saveFormData(): void {
+    const stringified = JSON.stringify(this.formData);
+    localStorage.setItem(this.FORM_DATA_LS_KEY, stringified);
+  }
+
+  private loadFormData(): void {
+    const data = localStorage.getItem(this.FORM_DATA_LS_KEY);
+    if (!data){ return; }
+
+    let parsed;
+    try {
+      parsed = JSON.parse(data);
+    } catch (e) {
+      return;
+    }
+    this.formData = parsed;
   }
 
 }
